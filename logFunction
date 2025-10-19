@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Source this in your .bashrc; this 
+# create .bash_env and source this lib
+# in your .bashrc export BASH_ENV="$HOME/.bash_env"
+
+
+
 #Colors
 # Text colors
 RED='\033[0;31m'
