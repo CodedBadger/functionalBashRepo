@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#Colors
+# Text colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[1;36m'
+WHITE='\033[0;37m'
+
+    # Bold colors
+BOLD_RED='\033[1;31m'
+BOLD_GREEN='\033[1;32m'
+
+# Reset color
+NC='\033[0m' # No Color - resets to default
+
+
+#log(){
+ # echo -e "${color:-$WHITE}LOG: $1${NC}" 2>&1
+#}
+
+debug=false
+
+log(){
+  case $1 in
+    info)
+    echo -e  "${color:-$WHITE}[LOG $1]: $2 ${NC}" 2>&1
+      ;;
+
+    warning)
+    echo -e  "${color:-$ORANGE}LOG $1: $2 ${NC}" 2>&1
+      ;;
+
+    error)
+    echo -e  "${color:-$RED}[LOG $1]: $2 ${NC}" 2>&1
+      ;;
+
+    debug)
+    if [[ $debug == true ]]; then
+      echo -e  "${GREEN}[LOG $1]: $2 ${NC}" 2>&1
+    fi
+      ;;
+
+    help)
+    echo -e "COLORS: ${RED}RED${NC} | ${GREEN}GREEN${NC} | ${YELLOW}YELLOW${NC} | ${BLUE}BLUE${NC} | ${BOLD_RED}BOLD_RED${NC} | ${BOLD_GREEN}BOLD_GREEN${NC}" 2>&1
+    echo -e "INPUTS: info | warning | error | debug | help " 2>&1
+    echo "Here is an example of what to input for log function: color=$<add color variable name here> log <add INPUT here> <add messge here>" 2>&1
+    echo -e "color=BLUE log info \"Hello world\" will output ${BLUE}[LOG INFO]: Hello world ${NC}" 2>&1
+      ;;
+
+    *)
+    echo -e  "${BOLD_RED}[LOG ERROR]: $1 IS NOT RECOGNIZED WITH THE LOG FUNCTION.${NC} ${GREEN}TYPE 'LOG HELP' FOR MORE INFO${NC}" 2>&1
+      ;;
+    esac
+}
