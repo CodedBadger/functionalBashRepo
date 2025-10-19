@@ -28,24 +28,25 @@ NC='\033[0m' # No Color - resets to default
 #}
 
 debug=false
+date=$(date "+%m-%d-%y@%H:%M")
 
 log(){
   case $1 in
     info)
-    echo -e  "${color:-$WHITE}[LOG $1]: $2 ${NC}" 2>&1
+    echo -e  "${color:-$WHITE}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
       ;;
 
     warning)
-    echo -e  "${color:-$ORANGE}LOG $1: $2 ${NC}" 2>&1
+    echo -e  "${color:-$ORANGE}LOG ${1^^}: $2 [$date]${NC}" 2>&1
       ;;
 
     error)
-    echo -e  "${color:-$RED}[LOG $1]: $2 ${NC}" 2>&1
+    echo -e  "${color:-$RED}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
       ;;
 
     debug)
     if [[ $debug == true ]]; then
-      echo -e  "${GREEN}[LOG $1]: $2 ${NC}" 2>&1
+      echo -e  "${GREEN}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
     fi
       ;;
 
