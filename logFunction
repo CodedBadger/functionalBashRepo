@@ -33,20 +33,20 @@ date=$(date "+%m-%d-%y@%H:%M")
 log(){
   case $1 in
     info)
-    echo -e  "${color:-$WHITE}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
+    echo -e  "${color:-$WHITE}[$date][LOG ${1^^}]: $2 ${NC}" 2>&1
       ;;
 
     warning)
-    echo -e  "${color:-$ORANGE}LOG ${1^^}: $2 [$date]${NC}" 2>&1
+    echo -e  "${color:-$ORANGE}[$date][LOG ${1^^}]: $2 ${NC}" 2>&1
       ;;
 
     error)
-    echo -e  "${color:-$RED}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
+    echo -e  "${color:-$RED}[$date][LOG ${1^^}]: $2 ${NC}" 2>&1
       ;;
 
     debug)
     if [[ $debug == true ]]; then
-      echo -e  "${GREEN}[LOG ${1^^}]: $2 [$date]${NC}" 2>&1
+      echo -e  "${GREEN}[$date][LOG ${1^^}]: $2 ${NC}" 2>&1
     fi
       ;;
 
@@ -58,7 +58,7 @@ log(){
       ;;
 
     *)
-    echo -e  "${BOLD_RED}[LOG ERROR]: $1 IS NOT RECOGNIZED WITH THE LOG FUNCTION.${NC} ${GREEN}TYPE 'LOG HELP' FOR MORE INFO${NC}" 2>&1
+    echo -e  "${BOLD_RED}[$date][LOG ERROR]: $1 IS NOT RECOGNIZED WITH THE LOG FUNCTION.${NC} ${GREEN}TYPE 'LOG HELP' FOR MORE INFO${NC}" 2>&1
       ;;
     esac
 }
