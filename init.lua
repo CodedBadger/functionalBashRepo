@@ -1,84 +1,101 @@
--- =========================
--- Editor Options
--- =========================
+-- Set <Space> as the leader key (must happen before plugins are loaded)
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
-vim.opt.number = true
-vim.opt.relativenumber = true
--- vim.opt.cursorline = true
+-- ==========================================
+-- General Settings
+-- ==========================================
+local opt = vim.opt
 
-vim.opt.tabstop = 2
-vim.opt.shiftwidth = 2
-vim.opt.expandtab = true
-vim.opt.smartindent = true
-vim.opt.autoindent = true
-vim.opt.wrap = true
+-- Appearance
+vim.cmd("colorscheme slate")   -- Set the built-in slate color scheme
 
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-vim.opt.incsearch = true
-vim.opt.hlsearch = true
+opt.number = true              -- Show absolute line numbers
+opt.relativenumber = true      -- Show relative line numbers (great for jumping)
+opt.termguicolors = true       -- Enable 24-bit RGB colors for modern themes
+opt.wrap = false               -- Disable line wrap
+opt.cursorline = true          -- Highlight the current line
 
-vim.opt.showmatch = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.background = "dark"
-vim.opt.termguicolors = true
-vim.opt.scrolloff = 8
+-- Indentation Guides
+opt.list = true                -- Show invisible characters
+opt.listchars = {
+    tab = "│ ",                -- Draw a vertical bar for tabs
+    leadmultispace = "│ ",     -- Draw a vertical bar for leading spaces (matches 2-space indent)
+    trail = "·",               -- Show dots for trailing whitespace
+}
 
-vim.cmd("syntax enable")
--- vim.cmd("colorscheme industry")
+-- Behavior
+opt.mouse = "a"                -- Enable mouse support in all modes
+opt.clipboard = "unnamedplus"  -- Sync Neovim clipboard with the Windows system clipboard
+opt.ignorecase = true          -- Ignore case when searching
+opt.smartcase = true           -- Don't ignore case if search term contains a capital letter
+opt.hlsearch = false           -- Don't leave search terms highlighted after searching
+opt.updatetime = 250           -- Decrease update time for faster completion and snappier UI
 
--- =========================
--- Terminal Settings
--- =========================
+-- Indentation
+opt.tabstop = 2                -- Number of spaces a <Tab> counts for
+opt.shiftwidth = 2             -- Number of spaces to use for each step of (auto)indent
+opt.expandtab = true           -- Convert tabs to spaces
+opt.smartindent = true         -- Auto-indent new lines intelligently
 
--- Disable line numbers in terminal buffers
-vim.api.nvim_create_autocmd("TermOpen", {
-  pattern = "*",
-  callback = function()
-    vim.opt_local.number = false
-    vim.opt_local.relativenumber = false
-    vim.cmd("startinsert")
-  end,
-})
+-- Window Splitting
+opt.splitbelow = true          -- Put new horizontal splits below the current window
+opt.splitright = true          -- Put new vertical splits to the right of the current window
 
--- =========================
--- Smart Ctrl+\ Mapping
--- =========================
+-- ==========================================
+-- Toggle Terminal Logic
+-- ==========================================
+local term_buf = nil
+local term_win = nil
 
-local function open_tree_and_terminal()
-  -- Open file tree (netrw)
-  vim.cmd("Lexplore")
-
-  -- Look for an existing terminal buffer
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_loaded(buf) then
-      if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
-        -- If terminal is already visible, jump to it
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-          if vim.api.nvim_win_get_buf(win) == buf then
-            vim.api.nvim_set_current_win(win)
-            return
-          end
+local function toggle_terminal()
+    -- If the terminal window is open and valid, hide it
+    if term_win and vim.api.nvim_win_is_valid(term_win) then
+        vim.api.nvim_win_hide(term_win)
+    else
+        -- Otherwise, create a new split at the bottom
+        vim.cmd("botright 15split")
+        term_win = vim.api.nvim_get_current_win()
+        
+        -- If we already have a running terminal buffer, attach it to the new window
+        if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+            vim.api.nvim_win_set_buf(term_win, term_buf)
+        else
+            -- If no buffer exists, start a new terminal session
+            vim.cmd("terminal")
+            term_buf = vim.api.nvim_get_current_buf()
+            
+            -- Clean up appearance for the terminal buffer
+            vim.opt_local.number = false
+            vim.opt_local.relativenumber = false
+            vim.opt_local.signcolumn = "no"
+            vim.opt_local.list = false -- Disable indentation guides in terminal
         end
-
-        -- Terminal exists but is hidden → show it
-        vim.cmd("belowright split")
-        vim.cmd("resize 12")
-        vim.api.nvim_win_set_buf(0, buf)
-        return
-      end
+        
+        -- Automatically enter insert mode when opening
+        vim.cmd("startinsert")
     end
-  end
-
-  -- No terminal exists → create one
-  vim.cmd("belowright split")
-  vim.cmd("resize 12")
-  vim.cmd("terminal")
 end
 
-vim.keymap.set(
-  "n",
-  "<C-\\>",
-  open_tree_and_terminal,
-  { noremap = true, silent = true }
-)
+-- Map the toggle function to Normal ("n") and Terminal ("t") modes
+vim.keymap.set({"n", "t"}, "<C-/>", toggle_terminal, { desc = "Toggle Terminal" })
+vim.keymap.set({"n", "t"}, "<C-_>", toggle_terminal, { desc = "Toggle Terminal (Fallback)" })
+
+-- ==========================================
+-- Keymaps
+-- ==========================================
+
+-- Exit Terminal Mode
+-- By default, Neovim traps you in the terminal. This lets you use `Esc` to get back to Normal mode.
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Window Navigation
+-- Use Ctrl + hjkl to move between split windows easily
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+-- Clear Search Highlights
+-- Press <Esc> in normal mode to clear lingering search highlights
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
